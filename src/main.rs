@@ -5,8 +5,6 @@ use hound::WavReader;
 use serde_json::Value;
 use walkdir::WalkDir;
 use rustfft::{FftPlanner, num_complex::Complex};
-use num_complex::Complex32;
-
 fn read_wav_file(path: &Path) -> Result<(Vec<f32>, u32), Box<dyn std::error::Error>> {
     let mut reader = WavReader::open(path)?;
     let spec = reader.spec();
@@ -62,6 +60,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Path to the NSynth test dataset
     let dataset_path = Path::new("/workspace/nsynth_data/nsynth-test");
     
+    if !dataset_path.exists() {
+        println!("The NSynth dataset is not present in the expected location.");
+        println!("To use this program, please download the NSynth dataset and place it in:");
+        println!("{}", dataset_path.display());
+        println!("\nYou can download the dataset from:");
+        println!("https://magenta.tensorflow.org/datasets/nsynth");
+        return Ok(());
+    }
+    
     // Read metadata
     let metadata_file = File::open(dataset_path.join("examples.json"))?;
     let metadata: Value = serde_json::from_reader(BufReader::new(metadata_file))?;
@@ -83,7 +90,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 
                 // Read and analyze audio
                 if let Ok((samples, sample_rate)) = read_wav_file(entry.path()) {
-                    let (max_amp, mean, std_dev) = analyze_audio(&samples, sample_rate);
+                    let (max_amp, mean, std_dev, spectrum) = analyze_audio(&samples, sample_rate);
                     
                     println!("\nFile: {}", file_stem);
                     println!("Instrument Family: {}", instrument_family);
@@ -93,6 +100,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     println!("Max Amplitude: {:.3}", max_amp);
                     println!("Mean: {:.3}", mean);
                     println!("Standard Deviation: {:.3}", std_dev);
+                    println!("Spectrum: {:?}", spectrum);
                     
                     count += 1;
                     if count >= 5 {
