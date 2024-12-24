@@ -1,0 +1,12 @@
+[package]
+name = "audio_classifier"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+hound = "3.5.1"  # For WAV file handling
+ndarray = "0.15.6"  # For numerical computations
+serde_json = "1.0"  # For JSON parsing
+walkdir = "2.4.0"  # For directory traversal
+rustfft = "6.1.0"  # For FFT computations
+num-complex = "0.4"  # For complex number support
